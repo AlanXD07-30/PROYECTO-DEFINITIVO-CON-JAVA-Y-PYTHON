@@ -1,0 +1,443 @@
+/* CONTROL GLOBAL */
+:root {
+    --bg-dark: #0f172a;
+    --bg-card: #1e293b;
+    --accent: #3b82f6;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --white: #ffffff;
+    --border: rgba(248, 250, 252, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+        url("../PAGINA PRINCIPAL INMUEBLES ING AYA/Imagenes/EDIFICIO_1.jpg") center/cover no-repeat;
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+a {
+    color: inherit;
+}
+
+button,
+input,
+textarea {
+    font: inherit;
+}
+
+/* HEADER */
+header {
+    background: #ffffff;
+    border-bottom: 3px solid var(--accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 5%;
+    flex-wrap: nowrap;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.logo-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: #111827;
+}
+
+.logo-head img {
+    height: 80px;
+}
+
+.nom_emp {
+    display: none;
+}
+
+.Imagen_empresa img {
+    height: 100px;
+    margin-right: 10px;
+}
+
+.navegación_encabezado {
+    width: auto;
+    max-width: 100%;
+    margin: 0 0 0 24px;
+    background: #FFF;
+}
+
+.navegación_encabezado > ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0;
+}
+
+.Menu_principal > li {
+    position: relative;
+    display: inline-block;
+}
+
+.Menu_principal > li > a {
+    display: block;
+    padding: 15px 20px;
+    color: #353535;
+    text-decoration: none;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.Menu_principal li a:hover {
+    color: #CE7D35;
+    transition: all 0.3s ease;
+}
+
+/*SUBMENU DE INMUEBLES*/
+
+.Submenu_inmuebles {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #333333;
+    width: max-content;
+    min-width: 180px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: block;
+    flex-direction: column;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1000;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.Submenu_inmuebles li {
+    display: block;
+    margin: 0;
+}
+
+.Submenu_inmuebles li + li a {
+    border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.Submenu_inmuebles li a {
+    display: block;
+    width: 100%;
+    padding: 12px 18px;
+    color: #fff;
+    text-decoration: none;
+}
+
+.Menu_principal > li:hover > .Submenu_inmuebles {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+}
+
+.navegación_encabezado a {
+    display: block;
+    padding: 15px 20px;
+    color: #353535;
+    text-decoration: none;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.navegación_encabezado a:hover {
+    color: #CE7D35;
+    transition: all 0.3s ease;
+}
+
+.nav-link-1,
+.nav-link-2,
+.volver {
+    border: none;
+    font-weight: 700;
+    background: transparent;
+}
+
+.nav-link-1:hover,
+.nav-link-2:hover,
+.volver:hover {
+    background: transparent;
+    color: #353535;
+}
+
+/* CONTACT SECTION */
+.contact-section {
+    padding: 80px 5%;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.contact-section h1 {
+    font-size: clamp(2rem, 3.2vw, 3.2rem);
+    margin-bottom: 24px;
+    color: var(--white);
+}
+
+.contact-section p {
+    max-width: 720px;
+    margin: 0 auto 50px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
+
+.contact-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.contact-form,
+.contact-info {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 36px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+}
+
+.contact-form h2,
+.contact-info h2 {
+    font-size: 1.85rem;
+    margin-bottom: 24px;
+    color: var(--white);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    border-radius: 14px;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #0f172a;
+    color: var(--text-primary);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.form-group textarea {
+    min-height: 180px;
+    resize: vertical;
+}
+
+.contact-form button {
+    width: 100%;
+    padding: 16px 22px;
+    border-radius: 14px;
+    border: none;
+    background: var(--accent);
+    color: var(--white);
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.contact-form button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 30px rgba(59, 130, 246, 0.24);
+}
+
+.contact-info p {
+    display: flex;
+    gap: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 18px;
+    align-items: center;
+}
+
+.contact-info span {
+    font-size: 1.4rem;
+}
+
+.contact-info p:last-child {
+    margin-bottom: 0;
+}
+
+/* FOOTER */
+footer {
+    background-color: #f5f5f5;
+    color: #333;
+    padding: 40px 5%;
+    margin-top: 30px;
+}
+
+.footer-top {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto 30px;
+    align-items: flex-start;
+}
+
+.footer-top .social,
+.footer-top .contacto {
+    min-width: 260px;
+    flex: 1;
+}
+
+.footer-top .social p,
+.footer-top .contacto p {
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 16px;
+}
+
+.footer-top .social span {
+    font-size: 1.6rem;
+    margin-right: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.footer-top .social span:hover {
+    transform: scale(1.1);
+    color: var(--accent);
+}
+
+.footer-top .contacto form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.footer-top input {
+    flex: 1 1 220px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: #ffffff;
+    color: #111827;
+}
+
+.footer-top button {
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent);
+    color: var(--white);
+    cursor: pointer;
+}
+
+.footer-top button:hover {
+    background: #2563eb;
+}
+
+.footer-bottom {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+}
+
+.footer-bottom nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.footer-bottom a {
+    color: #111827;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-bottom a:hover {
+    color: var(--accent);
+}
+
+.footer-bottom p,
+.footer-bottom small {
+    margin: 0;
+    color: #4b5563;
+}
+
+@media screen and (max-width: 980px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 18px;
+    }
+
+    .contact-section {
+        padding: 60px 5%;
+    }
+
+    .contact-container {
+        grid-template-columns: 1fr;
+    }
+
+    footer {
+        padding: 30px 5%;
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .contact-section h1 {
+        font-size: 2.5rem;
+    }
+
+    .footer-top {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .footer-top .contacto form,
+    .footer-top input,
+    .footer-top button {
+        width: 100%;
+    }
+
+    nav a {
+        width: 100%;
+        text-align: center;
+    }
+}
