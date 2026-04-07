@@ -6,6 +6,26 @@
   <title>Registro de usuario - Ing Aya</title>
   <link rel="stylesheet" href="login.css">
   <link rel="icon" href="../logo_INGAYA_gris-sin fondo.png">
+  <!-- Si tu backend usa CSRF y lo expone en meta tags, mantenlo aquí -->
+  <!-- <meta name="_csrf" content="${_csrf.token}"/>
+  <meta name="_csrf_header" content="${_csrf.headerName}"/> -->
+  <style>
+    /* Pequeños estilos inline para mensajes (puedes moverlos a login.css) */
+    #mensaje-servidor { text-align:center; font-weight:700; margin-top:12px; }
+    .hidden { display:none; }
+    .spinner {
+      display:inline-block;
+      width:16px;
+      height:16px;
+      border:2px solid rgba(0,0,0,0.1);
+      border-left-color:#fff;
+      border-radius:50%;
+      animation: spin .8s linear infinite;
+      vertical-align:middle;
+      margin-left:8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
    <header class="header-login">
@@ -17,32 +37,34 @@
   </header>
 
  <main class="login-container">
-    <form class="form-login" action="http://localhost:8080/registrar" method="POST">
+    <form id="form-registro" class="form-login" action="http://localhost:8080/registrar" method="POST" novalidate>
       <h2>Regístrate como Cliente</h2>
-      
+
       <p style="color: gray; font-size: 0.8rem; margin-bottom: 10px;">Información Personal</p>
-      
-      <input type="text" name="nombre" placeholder="Nombre completo" required />
-      
-      <input type="text" name="identificacion" placeholder="Número de identificación (Cédula)" required />
-      
-      <input type="text" name="telefono" placeholder="Teléfono / Celular" />
-      
-      <input type="text" name="direccion" placeholder="Dirección de residencia" />
-      
+
+      <input type="text" name="nombre" id="nombre" placeholder="Nombre completo" required />
+
+      <input type="text" name="identificacion" id="identificacion" placeholder="Número de identificación (Cédula)" required />
+
+      <input type="text" name="telefono" id="telefono" placeholder="Teléfono / Celular" />
+
+      <input type="text" name="direccion" id="direccion" placeholder="Dirección de residencia" />
+
       <label style="display: block; text-align: left; margin-left: 10px; font-size: 0.8rem;">Fecha de Nacimiento:</label>
-      <input type="date" name="fecha_nacimiento" />
+      <input type="date" name="fecha_nacimiento" id="fecha_nacimiento" />
 
       <hr style="border: 0.5px solid #eee; margin: 20px 0;">
 
       <p style="color: gray; font-size: 0.8rem; margin-bottom: 10px;">Datos de Cuenta</p>
-      
+
       <input type="email" name="email" id="email" placeholder="Correo electrónico" required />
-      
-      <input type="password" name="contrasena" id="contrasena" placeholder="Crea tu contraseña" required />
-      
-      <button class="btn primary" type="submit">Registrarme</button>
-      
+
+      <input type="password" name="contrasena" id="contrasena" placeholder="Crea tu contraseña (mínimo 6 caracteres)" required minlength="6" />
+
+      <button class="btn primary" id="btn-registrar" type="submit">Registrarme</button>
+
+      <div id="mensaje-servidor" class="hidden" role="status" aria-live="polite"></div>
+
       <div class="registro">
         <br>
         <p>¿Ya tienes cuenta? <a href="login.html">Inicia Sesión</a></p>
@@ -50,36 +72,101 @@
     </form>
  </main>
 
-
 <script>
-document.querySelector('.form-login').addEventListener('submit', function(e) {
-    e.preventDefault(); // Evita que la página se recargue en blanco
+(function() {
+  const form = document.getElementById('form-registro');
+  const btn = document.getElementById('btn-registrar');
+  const mensaje = document.getElementById('mensaje-servidor');
 
-    const formData = new FormData(this);
+  function formatDateToDDMMYYYY(isoDate) {
+    if (!isoDate) return '';
+    const parts = isoDate.split('-');
+    if (parts.length !== 3) return '';
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
 
-    fetch('http://localhost:8080/registrar', {
+  function showMessage(text, success) {
+    mensaje.classList.remove('hidden');
+    mensaje.textContent = text;
+    mensaje.style.color = success ? 'green' : 'red';
+  }
+
+  function setLoading(loading) {
+    if (loading) {
+      btn.disabled = true;
+      if (!document.getElementById('spinner')) {
+        const sp = document.createElement('span');
+        sp.id = 'spinner';
+        sp.className = 'spinner';
+        btn.appendChild(sp);
+      }
+    } else {
+      btn.disabled = false;
+      const sp = document.getElementById('spinner');
+      if (sp) sp.remove();
+    }
+  }
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault(); // evita submit tradicional
+
+    const email = document.getElementById('email').value.trim();
+    const contrasena = document.getElementById('contrasena').value;
+    const nombre = document.getElementById('nombre').value.trim();
+    const identificacion = document.getElementById('identificacion').value.trim();
+
+    if (!email || !contrasena || !nombre || !identificacion) {
+      showMessage('Por favor completa los campos obligatorios.', false);
+      return;
+    }
+    if (contrasena.length < 6) {
+      showMessage('La contraseña debe tener al menos 6 caracteres.', false);
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append('email', email);
+    fd.append('contrasena', contrasena);
+    fd.append('nombre', nombre);
+    fd.append('identificacion', identificacion);
+    fd.append('telefono', document.getElementById('telefono').value.trim() || '');
+    fd.append('direccion', document.getElementById('direccion').value.trim() || '');
+
+    const fechaIso = document.getElementById('fecha_nacimiento').value;
+    const fechaFormateada = formatDateToDDMMYYYY(fechaIso);
+    if (fechaFormateada) fd.append('fecha_nacimiento', fechaFormateada);
+
+    setLoading(true);
+    showMessage('Enviando registro...', true);
+
+    try {
+      const response = await fetch(form.action, {
         method: 'POST',
-        body: formData
-    })
-    .then(response => response.text()) // Recibe el texto del controlador
-    .then(mensaje => {
-        // Busca o crea un lugar donde poner el mensaje
-        let contenedorMensaje = document.getElementById('mensaje-servidor');
-        if(!contenedorMensaje){
-            contenedorMensaje = document.createElement('p');
-            contenedorMensaje.id = 'mensaje-servidor';
-            contenedorMensaje.style.textAlign = 'center';
-            contenedorMensaje.style.fontWeight = 'bold';
-            this.appendChild(contenedorMensaje);
-        }
-        
-        contenedorMensaje.innerText = mensaje;
-        
-        // Si fue éxito, lo ponemos en verde, si no en rojo
-        contenedorMensaje.style.color = mensaje.includes("correctamente") ? "green" : "red";
-    });
-});
+        body: fd
+        // credentials: 'include'  <-- quítalo si no necesitas cookies
+      });
+
+      const text = await response.text();
+
+      if (response.ok) {
+        showMessage(text || 'Registro exitoso.', true);
+        // NO redirigir automáticamente; si quieres redirigir, descomenta la línea siguiente:
+        // setTimeout(() => window.location.href = 'login.html', 1500);
+      } else {
+        showMessage(`Error ${response.status}: ${text || response.statusText}`, false);
+        console.error('Registro error', response.status, text);
+      }
+    } catch (err) {
+      console.error('Fetch error', err);
+      showMessage('Error de conexión con el servidor. Intenta más tarde.', false);
+    } finally {
+      setLoading(false);
+    }
+  });
+})();
 </script>
+
+
 
  <footer class="footer-login">
     <img src="../logo_INGAYA_gris-sin fondo.png " alt="Logo pequeño">

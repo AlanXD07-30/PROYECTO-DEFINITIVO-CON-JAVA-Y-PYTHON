@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -10,22 +12,43 @@ public class Rol {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_rol")
-    private Long id;
+    private Long idRol;
 
     @Column(name = "nombre_rol", unique = true, nullable = false)
-    private String nombre;
+    private String nombreRol;
 
-    // Relación inversa opcional con usuarios
-    @ManyToMany(mappedBy = "roles")
-    private Set<Usuario> usuarios;
+    // Relación inversa opcional con usuarios (lazy para evitar carga innecesaria)
+    @JsonIgnore
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+    private Set<Usuario> usuarios = new HashSet<>();
 
-    // Getters y Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Rol() { }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public Rol(String nombreRol) {
+        this.nombreRol = nombreRol;
+    }
 
-    public Set<Usuario> getUsuarios() { return usuarios; }
-    public void setUsuarios(Set<Usuario> usuarios) { this.usuarios = usuarios; }
+    public Long getIdRol() {
+        return idRol;
+    }
+
+    public void setIdRol(Long idRol) {
+        this.idRol = idRol;
+    }
+
+    public String getNombreRol() {
+        return nombreRol;
+    }
+
+    public void setNombreRol(String nombreRol) {
+        this.nombreRol = nombreRol;
+    }
+
+    public Set<Usuario> getUsuarios() {
+        return usuarios;
+    }
+
+    public void setUsuarios(Set<Usuario> usuarios) {
+        this.usuarios = usuarios;
+    }
 }

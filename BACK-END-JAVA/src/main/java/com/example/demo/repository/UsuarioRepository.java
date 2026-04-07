@@ -7,12 +7,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    // --- TUS MÉTODOS ORIGINALES (NO TOCAR) ---
+    // --- Consultas nativas originales (no tocar) ---
     @Query(value = """
         SELECT u.*
         FROM USUARIO u
@@ -29,8 +31,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     """, nativeQuery = true)
     List<String> obtenerRoles(@Param("email") String email);
 
-    // --- NUEVOS MÉTODOS PARA EL REGISTRO (SOLO AGREGADOS) ---
-
+    // --- Métodos nativos para registro (no tocar) ---
     @Modifying
     @Transactional
     @Query(value = "INSERT INTO USUARIO (email, contrasena) VALUES (:email, :pass)", nativeQuery = true)
@@ -44,4 +45,34 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
                 (SELECT id_rol FROM ROL WHERE nombre_rol = 'CLIENTE'))
     """, nativeQuery = true)
     void asignarRolCliente(@Param("email") String email);
+
+    // --- Métodos recomendados y compatibles ---
+
+    /**
+     * Búsqueda segura por email (derivada por Spring Data).
+     */
+    Optional<Usuario> findByEmail(String email);
+
+    /**
+     * Compatibilidad: si otras clases llaman findByUsername(...) tratamos el argumento
+     * como email y delegamos a findByEmail(...). Al ser default, Spring no intenta
+     * derivar una query por la propiedad 'username'.
+     */
+    default Optional<Usuario> findByUsername(String username) {
+        return findByEmail(username);
+    }
+
+    /**
+     * Compatibilidad para findByUsernameOrEmail(username, email).
+     * Implementación simple: intenta buscar por email (primer parámetro),
+     * si no encuentra, intenta con el segundo parámetro.
+     */
+    default Optional<Usuario> findByUsernameOrEmail(String username, String email) {
+        // Intentamos tratar username como email primero
+        Optional<Usuario> byUsername = findByEmail(username);
+        if (byUsername.isPresent()) {
+            return byUsername;
+        }
+        return findByEmail(email);
+    }
 }

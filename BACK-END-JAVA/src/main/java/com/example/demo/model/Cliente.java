@@ -9,24 +9,31 @@ public class Cliente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_cliente;
+    @Column(name = "id_cliente")
+    private Long idCliente;
 
+    @Column(name = "nombre")
     private String nombre;
+
+    @Column(name = "identificacion")
     private String identificacion;
+
+    @Column(name = "telefono")
     private String telefono;
+
+    @Column(name = "direccion")
     private String direccion;
 
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
 
-    @OneToOne
-    @JoinColumn(name = "id_usuario")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    // --- GETTERS Y SETTERS (Sin esto sale rojo en el Controller) ---
-
-    public Long getId_cliente() { return id_cliente; }
-    public void setId_cliente(Long id_cliente) { this.id_cliente = id_cliente; }
+    // getters y setters
+    public Long getIdCliente() { return idCliente; }
+    public void setIdCliente(Long idCliente) { this.idCliente = idCliente; }
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }

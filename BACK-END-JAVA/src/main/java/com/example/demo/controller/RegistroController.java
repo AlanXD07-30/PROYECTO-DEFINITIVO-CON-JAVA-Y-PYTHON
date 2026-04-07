@@ -2,40 +2,40 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Cliente;
 import com.example.demo.model.Usuario;
-import com.example.demo.model.Rol;
 import com.example.demo.repository.ClienteRepository;
 import com.example.demo.repository.UsuarioRepository;
-import com.example.demo.repository.RolRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Set;
+import java.time.format.DateTimeParseException;
 
-@Controller
-@CrossOrigin(origins = "*")
+@RestController
+@RequestMapping
 public class RegistroController {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final ClienteRepository clienteRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final Logger logger = LoggerFactory.getLogger(RegistroController.class);
 
-    @Autowired
-    private ClienteRepository clienteRepository;
-
-    @Autowired
-    private RolRepository rolRepository;
-
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    public RegistroController(UsuarioRepository usuarioRepository,
+                              ClienteRepository clienteRepository,
+                              BCryptPasswordEncoder passwordEncoder) {
+        this.usuarioRepository = usuarioRepository;
+        this.clienteRepository = clienteRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @PostMapping("/registrar")
-    @ResponseBody
     @Transactional
-    public String registrarTodo(
+    public ResponseEntity<String> registrar(
             @RequestParam String email,
             @RequestParam String contrasena,
             @RequestParam String nombre,
@@ -45,45 +45,56 @@ public class RegistroController {
             @RequestParam(required = false) String fecha_nacimiento) {
 
         try {
-            // 1️⃣ Verificar si el email ya existe
-            if (usuarioRepository.buscarPorEmail(email) != null) {
-                return "Error: Ya existe un usuario con ese correo";
+            if (email == null || email.isBlank()) {
+                return ResponseEntity.badRequest().body("El email es obligatorio");
+            }
+            if (contrasena == null || contrasena.length() < 6) {
+                return ResponseEntity.badRequest().body("La contraseña debe tener al menos 6 caracteres");
+            }
+            if (nombre == null || nombre.isBlank() || identificacion == null || identificacion.isBlank()) {
+                return ResponseEntity.badRequest().body("Nombre e identificación son obligatorios");
             }
 
-            // 2️⃣ Crear Usuario
-            Usuario usuario = new Usuario();
-            usuario.setEmail(email);
-            usuario.setContrasena(passwordEncoder.encode(contrasena));
-
-            // 3️⃣ Asignar rol CLIENTE automáticamente
-            Rol rolCliente = rolRepository.findByNombre("CLIENTE")
-                    .orElseThrow(() -> new RuntimeException("Rol CLIENTE no encontrado"));
-            usuario.setRoles(Set.of(rolCliente));
-
-            // Guardamos usuario primero para obtener ID
-            Usuario usuarioGuardado = usuarioRepository.saveAndFlush(usuario);
-
-            // 4️⃣ Crear Cliente
-            Cliente cliente = new Cliente();
-            cliente.setNombre(nombre);
-            cliente.setIdentificacion(identificacion);
-            cliente.setTelefono(telefono);
-            cliente.setDireccion(direccion);
-
-            if (fecha_nacimiento != null && !fecha_nacimiento.isEmpty()) {
-                // Formato dd/MM/yyyy
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                cliente.setFechaNacimiento(LocalDate.parse(fecha_nacimiento, formatter));
+            if (usuarioRepository.findByEmail(email).isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Ya existe un usuario con ese correo");
             }
 
-            cliente.setUsuario(usuarioGuardado); // vincula usuario al cliente
-            clienteRepository.save(cliente);
+            Usuario u = new Usuario();
+            u.setEmail(email);
+            u.setContrasena(passwordEncoder.encode(contrasena));
+            u.setEstado("ACTIVO");
+            usuarioRepository.save(u);
 
-            return "¡Te has registrado correctamente!";
+            LocalDate fecha = null;
+            if (fecha_nacimiento != null && !fecha_nacimiento.isBlank()) {
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                try {
+                    fecha = LocalDate.parse(fecha_nacimiento, fmt);
+                } catch (DateTimeParseException ex) {
+                    logger.warn("Formato de fecha inválido recibido: {}", fecha_nacimiento);
+                    return ResponseEntity.badRequest().body("Formato de fecha inválido. Use dd/MM/yyyy");
+                }
+            }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Error al registrar: " + e.getMessage();
+            Cliente c = new Cliente();
+            c.setNombre(nombre);
+            c.setIdentificacion(identificacion);
+            c.setTelefono(telefono);
+            c.setDireccion(direccion);
+            c.setFechaNacimiento(fecha);
+            c.setUsuario(u);
+            clienteRepository.save(c);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body("Usuario y cliente registrados correctamente");
+        } catch (Exception ex) {
+            logger.error("Error registrando usuario/cliente", ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al registrar usuario/cliente");
         }
+    }
+
+    @GetMapping("/registrar")
+    public ResponseEntity<String> registrarGet() {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Este endpoint acepta solo POST. Use el formulario de registro.");
     }
 }
