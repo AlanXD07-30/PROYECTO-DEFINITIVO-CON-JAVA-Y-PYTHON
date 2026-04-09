@@ -55,8 +55,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     /**
      * Compatibilidad: si otras clases llaman findByUsername(...) tratamos el argumento
-     * como email y delegamos a findByEmail(...). Al ser default, Spring no intenta
-     * derivar una query por la propiedad 'username'.
+     * como email y delegamos a findByEmail(...).
      */
     default Optional<Usuario> findByUsername(String username) {
         return findByEmail(username);
@@ -64,11 +63,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     /**
      * Compatibilidad para findByUsernameOrEmail(username, email).
-     * Implementación simple: intenta buscar por email (primer parámetro),
-     * si no encuentra, intenta con el segundo parámetro.
      */
     default Optional<Usuario> findByUsernameOrEmail(String username, String email) {
-        // Intentamos tratar username como email primero
         Optional<Usuario> byUsername = findByEmail(username);
         if (byUsername.isPresent()) {
             return byUsername;

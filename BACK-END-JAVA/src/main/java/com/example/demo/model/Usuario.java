@@ -57,6 +57,15 @@ public class Usuario {
         this.idUsuario = idUsuario;
     }
 
+    // Compatibilidad con llamadas a getId()
+    public Long getId() {
+        return this.idUsuario;
+    }
+
+    public void setId(Long id) {
+        this.idUsuario = id;
+    }
+
     public String getEmail() {
         return email;
     }

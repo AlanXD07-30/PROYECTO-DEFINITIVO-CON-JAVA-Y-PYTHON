@@ -1,86 +1,88 @@
-function alertaInmueble(event) { 
+// IIFE para evitar contaminación global
+
+  "use strict";
+
+  // ===============================
+  // ALERTAS (SweetAlert2)
+  // ===============================
+  function alertaInmueble(event) {
+    if (event && typeof event.preventDefault === "function") event.preventDefault();
+
     const swalWithBootstrapButtons = Swal.mixin({
-  customClass: {
-    confirmButton: "btn btn-success",
-    cancelButton: "btn btn-danger"
-  },
-  buttonsStyling: false
-});
-swalWithBootstrapButtons.fire({
-  title: "Quieres volver a atras?",
-  icon: "warning",
-  showCancelButton: true,
-  confirmButtonText: "Si",
-  cancelButtonText: "No",
-  reverseButtons: true
-}).then((result) => {
-  if (result.isConfirmed) {
-    swalWithBootstrapButtons.fire({
-      title: "Deleted!",
-      text: "Your file has been deleted.",
-      icon: "success"
+      customClass: {
+        confirmButton: "btn btn-success",
+        cancelButton: "btn btn-danger"
+      },
+      buttonsStyling: false
     });
-  } 
-});
-}
 
-
-
+    swalWithBootstrapButtons.fire({
+      title: "¿Quieres volver atrás?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí",
+      cancelButtonText: "No",
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.history.back();
+      }
+    });
+  }
 
   function confirmarSobreNosotros(event) {
-    event.preventDefault(); 
+    if (event && typeof event.preventDefault === "function") event.preventDefault();
+
     Swal.fire({
-  title: "Quieres ver mas Sobre Nosotros?",
-  text: "Puedes ver mas sobre nosotros!",
-  icon: "warning",
-  showCancelButton: true,
-  confirmButtonColor: "#3085d6",
-  cancelButtonColor: "#d33",
-  confirmButtonText: "Confirmar"
-})
-.then((result) => {
+      title: "¿Quieres ver más sobre nosotros?",
+      text: "Puedes ver más sobre nosotros",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Confirmar"
+    }).then((result) => {
       if (result.isConfirmed) {
-        window.location.href = "../SOBRE NOSOTROS/sobrenosotros.html";
+        // Recomendación: evita espacios en rutas; si existen, codifícalas con encodeURI
+        window.location.href = "../SOBRE%20NOSOTROS/sobrenosotros.html";
       }
     });
   }
-
-
 
   function confirmarInmuebles(event) {
-    event.preventDefault(); 
+    if (event && typeof event.preventDefault === "function") event.preventDefault();
+
     Swal.fire({
-  title: "Quieres ver nuestros Inmuebles?",
-  text: "Puedes ver nuestros Inmuebles!",
-  icon: "warning",
-  showCancelButton: true,
-  confirmButtonColor: "#3b82f6",
-  cancelButtonColor: "#d33",
-  confirmButtonText: "Confirmar"
-})
-.then((result) => {
+      title: "¿Quieres ver nuestros inmuebles?",
+      text: "Puedes ver nuestros inmuebles",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3b82f6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Confirmar"
+    }).then((result) => {
       if (result.isConfirmed) {
-        window.location.href = "../SECCIÓN DE INMUEBLES/inmuebles.html";
+        window.location.href = "../SECCIÓN%20DE%20INMUEBLES/inmuebles.html";
       }
     });
   }
 
-
-
   function confirmarNosotros(event) {
-    event.preventDefault(); 
+    if (event && typeof event.preventDefault === "function") event.preventDefault();
+
     Swal.fire({
-  title: "Quieres ver como Contactarnos?",
-  text: "Puedes ver como contactarnos!",
-  icon: "warning",
-  showCancelButton: true,
-  confirmButtonColor: "#3085d6",
-  cancelButtonColor: "#d33",
-  confirmButtonText: "Confirmar"
-})
-.then((result) => {
+      title: "¿Quieres ver cómo contactarnos?",
+      text: "Puedes ver cómo contactarnos",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Confirmar"
+    }).then((result) => {
       if (result.isConfirmed) {
         window.location.href = "../CONTACTANOS/contactanos.html";
       }
     });
   }
+
+  

@@ -29,7 +29,7 @@
                             <li><a href="../SECCIÓN DE INMUEBLES/Locales/inmuebles.html">Locales comerciales</a></li>
                         </ul>
                     </li>
-                <li><a href="#"> Publica tu inmueble </a></li>
+                
                 <li><a href="../PROCESO INGRESO DE ADMINISTRADOR, EMPELADO, SECRETARIA, USUARIO/login.html" class="inicio-nav">Iniciar sesión</a></li>
                 <li><a href="../PROCESO INGRESO DE ADMINISTRADOR, EMPELADO, SECRETARIA, USUARIO/registro.html" class="crearcue-nav">Crear cuenta</a></li>
 
@@ -144,18 +144,24 @@
 
 
 <!-- Sección de visualización 3D -->
-<section class="visualizacion">
-    <div class="contenido-visualizacion">
-        <div class="texto-visualizacion">
-            <h2>Te ofrecemos visualización 3D</h2>
-            <p>Podrás visualizar el inmueble y ver todos sus espacios tanto por dentro como por fuera y también podrás agregarlos a tu lista de deseos desde tu cuenta principal.</p>
-        </div>
-        <div class="imagenes-3d">
-            <img src="https://images.pexels.com/photos/7031406/pexels-photo-7031406.jpeg" alt="Interior 1" class="base">
-            <img src="https://images.pexels.com/photos/6489107/pexels-photo-6489107.jpeg" alt="Interior 2" class="superpuesta">
-        </div>
+<section class="visualizacion" aria-labelledby="vis-title">
+  <div class="contenido-visualizacion">
+    <div class="texto-visualizacion">
+      <h2 id="vis-title">Te ofrecemos visualización 3D</h2>
+      <p>
+        Podrás visualizar el inmueble y ver todos sus espacios tanto por dentro como por fuera y también podrás agregarlos a tu lista de deseos desde tu cuenta principal.
+      </p>
     </div>
+
+    <div class="imagenes-3d" aria-hidden="false">
+      <div class="imagen-wrapper">
+        <img src="https://images.pexels.com/photos/7031406/pexels-photo-7031406.jpeg" alt="Interior 1" class="base">
+        <img src="https://images.pexels.com/photos/6489107/pexels-photo-6489107.jpeg" alt="Interior 2" class="superpuesta">
+      </div>
+    </div>
+  </div>
 </section>
+
 
 <!-- Sección de beneficios -->
 <section class="beneficios">

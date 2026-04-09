@@ -7,6 +7,7 @@
 
   <link rel="stylesheet" href="login.css">
   <link rel="icon" href="../logo_INGAYA_gris-sin fondo.png">
+
   <style>
     /* Mensajes y spinner mínimos (puedes mover a login.css) */
     #mensaje-servidor { text-align:center; font-weight:700; margin-top:12px; display:none; }
@@ -25,15 +26,19 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     button[disabled] { opacity: 0.6; cursor: not-allowed; }
+    /* Pequeños ajustes para accesibilidad */
+    input:invalid { outline: 2px solid #f44336; }
+    input:focus { outline: 2px solid #2196F3; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
   </style>
 </head>
 
 <body>
 
   <header class="header-login">
-    <a href="#" class="logo-head">
-      <img src="../logo_INGAYA_gris-sin fondo.png" alt="Logo ING AYA">
-      <h2 class="nom_emp"></h2>
+    <a href="#" class="logo-head" aria-label="Inicio">
+      <img src="../logo_INGAYA_gris-sin fondo.png" alt="Logo ING AYA" width="120">
+      <h2 class="nom_emp" aria-hidden="true"></h2>
     </a>
 
     <a href="../PAGINA PRINCIPAL INMUEBLES ING AYA/Index.html" class="volver-inicio">
@@ -41,33 +46,40 @@
     </a>
   </header>
 
-  <main class="login-container">
+  <main class="login-container" role="main" aria-labelledby="titulo-login">
 
-    <form id="form-login" action="http://localhost:8080/login" method="POST" novalidate>
+    <!-- action apunta al endpoint que configuramos en SecurityConfig (/perform_login) -->
+    <form id="form-login" action="http://localhost:8080/perform_login" method="POST" novalidate>
       
-      <h2>Inicia Sesión</h2>
+      <h2 id="titulo-login">Inicia Sesión</h2>
       
+      <label for="email" class="sr-only">Correo electrónico</label>
       <input 
         type="email" 
         name="email" 
         id="email"
         placeholder="Correo electrónico" 
         required 
+        autocomplete="username"
+        aria-required="true"
       />
 
+      <label for="password" class="sr-only">Contraseña</label>
       <input 
         type="password" 
         name="password" 
         id="password"
         placeholder="Contraseña" 
         required 
+        autocomplete="current-password"
+        aria-required="true"
       />
       
-      <button type="submit" id="btn-login">Iniciar Sesión</button>
+      <button type="submit" id="btn-login" aria-live="polite">Iniciar Sesión</button>
 
       <div id="mensaje-servidor" role="status" aria-live="polite"></div>
       
-      <div class="registro">
+      <div class="registro" aria-hidden="false">
         <br>
         <p>¿No tienes cuenta? <a href="registro.html">Regístrate</a></p>
         <p>¿Has olvidado tu contraseña? 
@@ -80,7 +92,7 @@
   </main>
 
   <footer class="footer-login">
-    <img src="../logo_INGAYA_gris-sin fondo.png" alt="Logo pequeño">
+    <img src="../logo_INGAYA_gris-sin fondo.png" alt="Logo pequeño" width="80">
     <p>Todos los derechos reservados</p>
   </footer>
 
@@ -118,8 +130,113 @@
     }
   }
 
+  // Intenta obtener token CSRF desde meta tag o cookie XSRF-TOKEN
+  function getCsrfToken() {
+    // 1) meta tag (server-side rendering)
+    const meta = document.querySelector('meta[name="_csrf"]');
+    if (meta && meta.content) return { headerName: 'X-CSRF-TOKEN', token: meta.content };
+
+    // 2) cookie (common pattern: XSRF-TOKEN or X-XSRF-TOKEN)
+    const cookie = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN=') || c.startsWith('X-XSRF-TOKEN='));
+    if (cookie) {
+      const value = decodeURIComponent(cookie.split('=')[1]);
+      // Spring commonly expects header 'X-XSRF-TOKEN' or 'X-CSRF-TOKEN'
+      return { headerName: 'X-XSRF-TOKEN', token: value };
+    }
+
+    // 3) no token found
+    return null;
+  }
+
+  // Determina si la petición es same-origin con el backend
+  function isSameOrigin(url) {
+    try {
+      const target = new URL(url, window.location.href);
+      return target.origin === window.location.origin;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Si el backend está en otro origen, fetch debe usar credentials: 'include'
+  async function submitWithFetch(actionUrl, formData) {
+    const csrf = getCsrfToken();
+    const headers = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    };
+    if (csrf && csrf.headerName && csrf.token) {
+      headers[csrf.headerName] = csrf.token;
+    }
+
+    // Convertimos FormData a URLSearchParams para application/x-www-form-urlencoded
+    const body = new URLSearchParams();
+    for (const pair of formData.entries()) {
+      body.append(pair[0], pair[1]);
+    }
+
+    try {
+      const response = await fetch(actionUrl, {
+        method: 'POST',
+        headers,
+        body: body.toString(),
+        credentials: 'include',
+        redirect: 'manual'
+      });
+
+      // Manejo de redirecciones: preferimos Location header si está disponible
+      if (response.status === 302 || response.status === 301 || response.status === 303 || response.status === 307) {
+        const location = response.headers.get('Location');
+        if (location) {
+          const target = new URL(location, actionUrl);
+          window.location.href = target.href;
+          return;
+        }
+      }
+
+      // Algunos backends devuelven JSON con { redirect: '...' }
+      const contentType = response.headers.get('Content-Type') || '';
+      if (contentType.includes('application/json')) {
+        const json = await response.json();
+        if (json.redirect) {
+          window.location.href = json.redirect;
+          return;
+        }
+        // show message if provided
+        if (json.message) {
+          if (response.ok) showMessage(json.message, true);
+          else showMessage(json.message, false);
+        } else {
+          if (response.ok) showMessage('Inicio de sesión correcto.', true);
+          else showMessage(`Error ${response.status}: ${response.statusText}`, false);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Si no es JSON, tratamos como texto/HTML
+      const payloadText = await response.text();
+
+      if (response.ok) {
+        showMessage(payloadText || 'Inicio de sesión correcto.', true);
+        // Si no hay redirección, espera 700ms y redirige a /home por defecto
+        setTimeout(() => {
+          window.location.href = 'http://localhost:8080/home';
+        }, 700);
+      } else {
+        showMessage(payloadText || `Error ${response.status}: ${response.statusText}`, false);
+      }
+    } catch (err) {
+      console.error('Error en login (fetch):', err);
+      showMessage('Error de conexión con el servidor. Intenta más tarde.', false);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   form.addEventListener('submit', async function(e) {
-    e.preventDefault(); // manejamos con fetch para controlar mensajes y redirecciones
+    e.preventDefault(); // manejamos con JS para controlar mensajes y redirecciones
 
     clearMessage();
 
@@ -138,38 +255,31 @@
     setLoading(true);
     showMessage('Iniciando sesión...', true);
 
-    try {
-      // redirect: 'manual' para capturar Location en respuestas 302
-      const response = await fetch(form.action, {
-        method: 'POST',
-        body: fd,
-        redirect: 'manual'
-      });
+    const actionUrl = form.action;
 
-      // Si el servidor responde con redirect (302/301) y Location, redirigimos el navegador
-      if (response.status === 302 || response.status === 301) {
-        const location = response.headers.get('Location');
-        if (location) {
-          window.location.href = location;
-          return;
+    // Si el formulario está en el mismo origen que el backend, hacemos submit normal
+    // para que el navegador maneje cookies y redirecciones automáticamente.
+    if (isSameOrigin(actionUrl)) {
+      // Insertar token CSRF en un input hidden si existe
+      const csrf = getCsrfToken();
+      if (csrf && csrf.token) {
+        let input = form.querySelector('input[name="_csrf"]');
+        if (!input) {
+          input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = '_csrf';
+          form.appendChild(input);
         }
+        input.value = csrf.token;
       }
 
-      // Si el servidor devuelve 200/4xx/5xx con cuerpo
-      const text = await response.text();
-
-      if (response.ok) {
-        showMessage(text || 'Inicio de sesión correcto.', true);
-      } else {
-        // Mostrar mensaje de error devuelto por el servidor o genérico
-        showMessage(text || `Error ${response.status}: ${response.statusText}`, false);
-      }
-    } catch (err) {
-      console.error('Error en login:', err);
-      showMessage('Error de conexión con el servidor. Intenta más tarde.', false);
-    } finally {
-      setLoading(false);
+      // Hacemos submit normal (no fetch) para permitir redirección y cookies
+      form.submit();
+      return;
     }
+
+    // Si es cross-origin, usamos fetch con credentials: 'include'
+    await submitWithFetch(actionUrl, fd);
   });
 })();
 </script>

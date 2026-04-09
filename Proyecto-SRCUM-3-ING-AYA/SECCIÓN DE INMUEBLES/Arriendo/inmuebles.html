@@ -1,30 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inmuebles en Arriendo | ING AYA</title>
-  <link rel="stylesheet" href="inmuebles.css">
-  <link rel="icon" href="../../logo_INGAYA_gris-sin fondo.png">
+  <link rel="stylesheet" href="inmuebles.css" />
+  <link rel="icon" href="../../logo_INGAYA_gris-sin fondo.png" />
 </head>
 <body>
   <header>
     <nav class="Imagen_empresa">
-      <a href="../../PAGINA PRINCIPAL INMUEBLES ING AYA/Index.html"><img src="../../logo_INGAYA_gris-sin fondo.png" alt="Logo de la empresa"></a>
+      <a href="../../PAGINA PRINCIPAL INMUEBLES ING AYA/Index.html">
+        <img src="../../logo_INGAYA_gris-sin fondo.png" alt="Logo de la empresa" />
+      </a>
     </nav>
 
     <nav class="navegación_encabezado">
       <ul class="Menu_principal">
         <li><a href="../../CONTACTANOS/contactanos.html">Contactanos</a></li>
         <li><a href="../../SOBRE NOSOTROS/sobrenosotros.html">Sobre nosotros</a></li>
-        <li><a href="inmuebles.html">Inmuebles</a>
+        <li>
+          <a href="inmuebles.html">Inmuebles</a>
           <ul class="Submenu_inmuebles">
             <li><a href="../Venta/inmuebles.html">En venta</a></li>
           </ul>
         </li>
         <li><a href="#">Publica tu inmueble</a></li>
-        <li><a href="../../PROCESO INGRESO DE ADMINISTRADOR, EMPELADO, SECRETARIA, USUARIO/login.html" class="nav-link-1">Iniciar sesión</a></li>
-        <li><a href="../../PROCESO INGRESO DE ADMINISTRADOR, EMPELADO, SECRETARIA, USUARIO/registro.html" class="nav-link-2">Crear cuenta</a></li>
+        <li>
+          <a href="../../PROCESO INGRESO DE ADMINISTRADOR, EMPELADO, SECRETARIA, USUARIO/login.html" class="nav-link-1">Iniciar sesión</a>
+        </li>
+        <li>
+          <a href="../../PROCESO INGRESO DE ADMINISTRADOR, EMPELADO, SECRETARIA, USUARIO/registro.html" class="nav-link-2">Crear cuenta</a>
+        </li>
       </ul>
     </nav>
   </header>
@@ -70,12 +77,16 @@
         Debes iniciar sesión para guardar favoritos en tu historial.
       </div>
 
-      <div class="grid-inmuebles" id="gridInmuebles">
+      <div class="grid-inmuebles" id="gridInmuebles" aria-live="polite">
         <!-- Aquí se cargan las tarjetas desde JavaScript. -->
       </div>
 
-      <div class="empty-state" id="emptyState">
+      <div class="empty-state" id="emptyState" hidden>
         No hay propiedades cargadas. Conecta tu base de datos y usa <code>window.INMUEBLES.setItems()</code> para mostrar resultados.
+      </div>
+
+      <div class="error-state" id="errorState" hidden>
+        <p id="errorMessage">Error al cargar propiedades.</p>
       </div>
     </section>
   </main>
@@ -87,8 +98,8 @@
       </div>
       <div>
         <p>Recibe novedades de nuevas propiedades</p>
-        <form>
-          <input type="email" placeholder="Correo electrónico" required>
+        <form id="subscribeForm">
+          <input type="email" placeholder="Correo electrónico" required />
           <button type="submit">Suscribir</button>
         </form>
       </div>
@@ -103,6 +114,7 @@
     </div>
   </footer>
 
-  <script src="inmuebles.js"></script>
+  <!-- Script con defer para asegurar que el DOM esté listo -->
+  <script src="inmuebles.js" defer></script>
 </body>
 </html>
